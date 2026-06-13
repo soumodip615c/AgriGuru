@@ -305,6 +305,54 @@ if st.session_state.answer:
         st.session_state.audio_path = ""
 
         st.rerun()
+# =====================================
+# Sidebar History
+# =====================================
+
+st.sidebar.title("📜 Conversation History")
+
+history_file = Path("output/history.txt")
+
+if history_file.exists():
+
+    with open(
+        history_file,
+        "r",
+        encoding="utf-8"
+    ) as f:
+
+        history_text = f.read()
+
+    st.sidebar.text_area(
+        "Saved Conversations",
+        value=history_text,
+        height=500
+    )
+
+    if st.sidebar.button(
+        "🗑 Clear History",
+        use_container_width=True
+    ):
+
+        with open(
+            history_file,
+            "w",
+            encoding="utf-8"
+        ) as f:
+
+            f.write("")
+
+        st.sidebar.success(
+            "History Cleared Successfully!"
+        )
+
+        st.rerun()
+
+else:
+
+    st.sidebar.info(
+        "No conversation history found."
+    )
 
 # =====================================
 # Footer
