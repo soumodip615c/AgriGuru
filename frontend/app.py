@@ -161,10 +161,7 @@ if st.button("🚜 Get Advice", use_container_width=True):
 
             st.session_state.answer = answer
             st.session_state.transcript = ""
-
-            audio_path = text_to_speech(answer)
-            st.session_state.audio_path = audio_path
-
+            st.session_state.audio_path = ""  
             save_history(question, answer)
 
     else:
@@ -205,9 +202,8 @@ if audio:
         answer = get_answer(transcript)
 
         st.session_state.answer = answer
-
-        audio_path = text_to_speech(answer)
-        st.session_state.audio_path = audio_path
+        st.session_state.audio_path = ""
+        
 
         save_history(transcript, answer)
 
@@ -246,9 +242,7 @@ if uploaded_audio is not None:
             answer = get_answer(transcript)
 
             st.session_state.answer = answer
-
-            audio_path = text_to_speech(answer)
-            st.session_state.audio_path = audio_path
+            st.session_state.audio_path = ""
 
             save_history(transcript, answer)
 
@@ -261,6 +255,9 @@ if st.session_state.transcript:
         f"🎤 Transcribed Question: {st.session_state.transcript}"
     )
 
+# =====================================
+# Response
+# =====================================
 # =====================================
 # Response
 # =====================================
@@ -279,6 +276,18 @@ if st.session_state.answer:
         unsafe_allow_html=True
     )
 
+    # Generate Voice Button
+    if st.button("🔊 Generate Voice"):
+
+        with st.spinner("Generating Voice..."):
+
+            audio_path = text_to_speech(
+                st.session_state.answer
+            )
+
+            st.session_state.audio_path = audio_path
+
+    # Audio Player
     if st.session_state.audio_path:
 
         st.subheader("🔊 Listen to AgriGuru")
@@ -288,6 +297,7 @@ if st.session_state.answer:
             format="audio/mp3"
         )
 
+    # Clear Button
     if st.button("🗑 Clear Response"):
 
         st.session_state.answer = ""
