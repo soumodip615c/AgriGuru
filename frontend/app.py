@@ -14,6 +14,7 @@ sys.path.append(str(project_root))
 from backend.main import get_answer, save_history
 from models.speech_to_text import transcribe_audio
 from models.text_to_speech import text_to_speech
+from models.disease_detector import predict_disease
 
 # =====================================
 # Page Config
@@ -103,6 +104,27 @@ st.markdown(
         color: #90EE90;
         margin-bottom: 15px;
     }}
+    .disease-box {{
+    background: rgba(0,0,0,0.75);
+    backdrop-filter: blur(12px);
+    border-radius: 20px;
+    padding: 25px;
+    margin-top: 25px;
+    margin-bottom: 20px;
+    color: white;
+}}
+
+.disease-title {{
+    font-size: 28px;
+    font-weight: bold;
+    color: #90EE90;
+    margin-bottom: 15px;
+}}
+
+.disease-item {{
+    font-size: 18px;
+    line-height: 1.8;
+}}
 
     </style>
     """,
@@ -120,6 +142,9 @@ if "transcript" not in st.session_state:
 
 if "audio_path" not in st.session_state:
     st.session_state.audio_path = ""
+    
+if "disease_result" not in st.session_state:
+    st.session_state.disease_result = None
 
 # =====================================
 # Logo
@@ -255,6 +280,81 @@ if st.session_state.transcript:
         f"🎤 Transcribed Question: {st.session_state.transcript}"
     )
 
+
+# =====================================
+# Plant Disease Detection
+# =====================================
+
+st.subheader("🌿 Plant Disease Detection")
+
+uploaded_image = st.file_uploader(
+    "Upload Leaf Image",
+    type=["jpg", "jpeg", "png"],
+    key="disease_uploader"
+)
+
+if uploaded_image is not None:
+
+    st.image(
+        uploaded_image,
+        caption="Uploaded Leaf Image",
+        use_container_width=True
+    )
+
+    if st.button(
+        "🔍 Detect Disease",
+        use_container_width=True
+    ):
+
+        os.makedirs(
+            "input/images",
+            exist_ok=True
+        )
+
+        image_path = os.path.join(
+            "input",
+            "images",
+            uploaded_image.name
+        )
+
+        with open(image_path, "wb") as f:
+            f.write(uploaded_image.getbuffer())
+
+        with st.spinner(
+            "🌿 Detecting Disease..."
+        ):
+
+            result = predict_disease(
+                image_path
+            )
+
+            st.session_state.disease_result = result
+# PASTE THE RESULT BLOCK HERE 👇
+
+if st.session_state.disease_result:
+
+    confidence = st.session_state.disease_result["confidence"]
+
+    if confidence >= 90:
+        st.success("🟢 High Confidence")
+    elif confidence >= 70:
+        st.warning("🟡 Medium Confidence")
+    else:
+        st.error("🔴 Low Confidence")
+
+    col1, col2 = st.columns(2)
+
+    with col1:
+        st.metric(
+            "Disease",
+            st.session_state.disease_result["disease"]
+        )
+
+    with col2:
+        st.metric(
+            "Confidence",
+            f"{confidence}%"
+        )
 # =====================================
 # Response
 # =====================================

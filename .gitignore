@@ -7,3 +7,14 @@ output/audio/
 
 .venv/
 venv/
+# Test files
+input/images/*
+input/audio/*
+
+# Prediction outputs
+output/audio/*
+output/predictions/*
+
+# Python cache
+__pycache__/
+*.pyc
